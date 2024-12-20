@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/OnlyLight/totolist-golang/helper"
+	"github.com/OnlyLight/totolist-golang/helper/db"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -19,7 +19,7 @@ type Todo struct {
 func GetTodos(c *fiber.Ctx) error {
 	var todos []Todo
 
-	cursor, err := helper.Collection.Find(context.Background(), bson.M{})
+	cursor, err := db.Collection.Find(context.Background(), bson.M{})
 
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func CreateTodo(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "Todo body is required"})
 	}
 
-	_, err := helper.Collection.InsertOne(context.Background(), todo)
+	_, err := db.Collection.InsertOne(context.Background(), todo)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func CreateTodo(c *fiber.Ctx) error {
 
 func GetTodoById(objectID primitive.ObjectID) Todo {
 	todo := &Todo{}
-	err := helper.Collection.FindOne(context.Background(), bson.M{"_id": objectID}).Decode(&todo)
+	err := db.Collection.FindOne(context.Background(), bson.M{"_id": objectID}).Decode(&todo)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,7 +89,7 @@ func UpdateTodo(c *fiber.Ctx) error {
 	filter := bson.M{"_id": objectID}
 	update := bson.M{"$set": bson.M{"completed": true}}
 
-	_, err = helper.Collection.UpdateOne(context.Background(), filter, update)
+	_, err = db.Collection.UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func DeleteTodo(c *fiber.Ctx) error {
 	}
 
 	filter := bson.M{"_id": objectID}
-	_, err = helper.Collection.DeleteOne(context.Background(), filter)
+	_, err = db.Collection.DeleteOne(context.Background(), filter)
 
 	if err != nil {
 		return err
